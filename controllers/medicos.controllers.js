@@ -41,26 +41,71 @@ const crearMedicos = async ( req, res = response )  => {
 
 }   
 
-const actualizarMedeicos = ( req, res = response ) => {
+const actualizarMedicos = async ( req, res = response ) => {
 
-    res.json({
-        ok: true,
-        msg: 'actualizarMedeicos'
-    });
+    const id = req.params.id
+
+    try {
+        const medicoDB = await Medico.findById( id );
+
+        if ( !medicoDB ) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Medico no encontrado por id'
+            });
+        }
+
+        const cambiosMedico = {
+            ...req.body,
+            usuarioModifico: req.id
+        }
+
+        const medicoActualizado = await Medico.findByIdAndUpdate( id, cambiosMedico, { new: true});
+
+        res.json({
+            ok: true,
+            medico: medicoActualizado
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado, hable con el administrador'
+        })
+    }
+
 }
 
-const borrarMedicos = ( req, res = response ) => {
+const borrarMedicos = async ( req, res = response ) => {
+    const id = req.params.id;
 
-    res.json({
-        ok: true,
-        msg: 'borrarMedicos'
-    });
+    try {
+        const medicoDB = await Medico.findById( id );
+        if ( !medicoDB ) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'medico no encontrado por id'
+            });
+        }
+        await Medico.findByIdAndDelete( id );
+
+        res.status(200).json({
+            ok: true,
+            msg: 'Medico eliminado correctamente'
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesparado... revisar logs!!!!!!!'
+        });
+    }
 }
 
 
 module.exports = {
     getMedicos,
     crearMedicos,
-    actualizarMedeicos,
+    actualizarMedicos,
     borrarMedicos
 }
